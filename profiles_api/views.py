@@ -8,6 +8,7 @@ from profiles_api import serializers
 from profiles_api import models
 from rest_framework.authentication import TokenAuthentication
 from profiles_api import permissions
+from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
@@ -122,8 +123,15 @@ class UserProfileFeedViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     serializer_class = serializers.ProfileFeedItemSerializer
     queryset = models.ProfileFeedItem.objects.all()
-    permission_classes = (permissions.UpdateOwnStatus,
-    IsAuthenticated)
+    permission_classes = ( permissions.UpdateOwnStatus,
+    IsAuthenticated
+    )
+
+
+    def list(self , request):
+        """Only logged in user can see that authorized user's feed"""
+        data = models.ProfileFeedItem.objects.filter(user_profile = request.user.id).values()
+        return Response({'message':'Hello!','a_view_set':data})
 
 
     def perform_create(self, serializer):
